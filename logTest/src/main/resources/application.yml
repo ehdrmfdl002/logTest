@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: logtest
+
+  logging:
+    level:
+      root: info
+      com.example.logtest.controller.testController: debug
+    pattern:
+      console: "%cyan([GatewayServer]) - %magenta([%d{yyyy:MM:dd HH:mm:ss}]) -  %highlight([%-5level]) - %green([%logger{35}]) - %msg%n"
+
+    # STDOUT ??? ?? (?? ??)
+    config:
+      file-appender: "false"

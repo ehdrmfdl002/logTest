@@ -1,0 +1,37 @@
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- STDOUT 앱던더 설정 (콘솔 출력) -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- 콘솔 출력 로그 패턴을 기본값으로 유지 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ROLLING 앱던더 설정 (롤링 로그 파일) -->
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 파일명에 %d{yyyy-MM-dd_HH-mm} 대신 %d{yyyy-MM-dd_HH-mm-ss}를 사용 -->
+            <fileNamePattern>logs/application.%d{yyyy-MM-dd_HH-mm}.%i.log</fileNamePattern>
+            <maxFileSize>5MB</maxFileSize> <!-- 파일 크기 조건 (5MB) -->
+            <maxHistory>30</maxHistory> <!-- 보관할 파일의 최대 개수 -->
+        </rollingPolicy>
+        <encoder>
+            <!-- 파일 출력 로그 패턴 변경: 실행 시간과 userId 값만 JSON 형태로 출력 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} - {"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","userId":"%X{userId}"}%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- testController 로거 설정 (파일에 저장) -->
+    <logger name="com.example.logtest.controller.testController" level="INFO">
+        <appender-ref ref="ROLLING" />
+    </logger>
+
+    <!-- 루트 로거 설정 (콘솔 출력) -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>
