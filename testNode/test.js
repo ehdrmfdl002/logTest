@@ -36,18 +36,15 @@ const apiCallTransport = new DailyRotateFile({
 app.use(express.json());
 
 // Apply apiCallTransport only to /test POST requests
-app.post('/test', async (req, res, next) => {
+app.post('/test', async (req, res) => {
   const userId = req.body.userId;
-  logger.info('Received request', { userId });
-  apiCallTransport.log({
+  logger.info('요청 받음', { userId });
+  await apiCallTransport.log({
     level: 'info',
-    message: 'Received request',
+    message: '요청 받음',
     timestamp: new Date().toISOString(),
     userId: userId,
   });
-
-  // Await the completion of the log writing before sending the response
-  await new Promise((resolve) => apiCallTransport.on('finish', resolve));
   res.status(200).json({ userId });
 });
 
@@ -60,22 +57,26 @@ app.get('/read', (req, res) => {
 
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
-      return res.status(500).json({ error: 'Error reading log file' });
+      return res.status(500).json({ error: '로그 파일 읽기 오류' });
     }
 
     const lines = data.split('\n');
     for (const line of lines) {
-      const pattern = /(?<="userId":")[^"]+/;
-      const matches = line.match(pattern);
-      if (matches) {
-        const userId = matches[0];
-        userIdCountMap[userId] = (userIdCountMap[userId] || 0) + 1;
+      try {
+        const logEntry = JSON.parse(line); // 로그 라인을 JSON으로 파싱
+        const { userId } = logEntry; // 'userId' 속성 추출
+        if (userId) {
+          userIdCountMap[userId] = (userIdCountMap[userId] || 0) + 1;
+        }
+      } catch (error) {
+        // 파싱 오류를 무시하고 다음 라인 처리 진행
       }
     }
 
     res.status(200).json(userIdCountMap);
   });
 });
+
 
 // Start the server
 const port = 3000;
